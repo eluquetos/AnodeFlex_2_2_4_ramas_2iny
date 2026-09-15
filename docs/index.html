@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#05080d">
+  <meta name="description" content="Cálculo y regulación ANODEFLEX de ocho ramas, alimentadas desde el centro por dos voltajes independientes.">
+  <title>ANODEFLEX · 2 + 2 nodos</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="apple-touch-icon" href="icon-192.svg">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><div class="brand-mark" aria-hidden="true">A</div><div><h1>ANODEFLEX</h1><p>2 + 2 nodos · 8 ramas</p></div></div>
+    <div class="system-state" aria-live="polite">
+      <div><span>Corriente total</span><strong id="head-current">— A</strong></div>
+      <div class="health"><i id="health-dot"></i><strong id="health-label">Sin calibrar</strong></div>
+    </div>
+  </header>
+
+  <main>
+    <section class="workflow-card" id="calibration">
+      <div class="section-title"><div class="step-label"><span class="step-number">1</span><span>MEDICIONES DE CAMPO</span></div><h2>Calcular resistencias del sistema</h2><p>Valores medidos con los ocho reóstatos en 0 Ω.</p></div>
+      <div class="measurement-groups">
+        <article class="measurement-card side-a">
+          <div class="measurement-head"><div><span>MEDICIONES DE CAMPO A</span><strong>Nodos 1 y 2</strong></div><b>VA</b></div>
+          <div class="field-grid calibration-fields">
+            <label>Voltaje VA<input id="nom-va" type="number" min="0.001" step="0.01" value="24"><em>V</em></label>
+            <label>Rc1<input id="rc1" type="number" min="0" step="0.01" value="0.4"><em>Ω</em></label>
+            <label>Rc2<input id="rc2" type="number" min="0" step="0.01" value="0.3"><em>Ω</em></label>
+            <label class="tone-11">Corriente I11<input id="nom-i11" type="number" min="0.001" step="0.01" value="1.2"><em>A</em></label>
+            <label class="tone-12">Corriente I12<input id="nom-i12" type="number" min="0.001" step="0.01" value="1.0"><em>A</em></label>
+            <label class="tone-21">Corriente I21<input id="nom-i21" type="number" min="0.001" step="0.01" value="0.9"><em>A</em></label>
+            <label class="tone-22">Corriente I22<input id="nom-i22" type="number" min="0.001" step="0.01" value="0.9"><em>A</em></label>
+          </div>
+        </article>
+        <article class="measurement-card side-b">
+          <div class="measurement-head"><div><span>MEDICIONES DE CAMPO B</span><strong>Nodos 3 y 4</strong></div><b>VB</b></div>
+          <div class="field-grid calibration-fields">
+            <label>Voltaje VB<input id="nom-vb" type="number" min="0.001" step="0.01" value="24"><em>V</em></label>
+            <label>Rc3<input id="rc3" type="number" min="0" step="0.01" value="0.2"><em>Ω</em></label>
+            <label>Rc4<input id="rc4" type="number" min="0" step="0.01" value="0.1"><em>Ω</em></label>
+            <label class="tone-31">Corriente I31<input id="nom-i31" type="number" min="0.001" step="0.01" value="0.8"><em>A</em></label>
+            <label class="tone-32">Corriente I32<input id="nom-i32" type="number" min="0.001" step="0.01" value="0.7"><em>A</em></label>
+            <label class="tone-41">Corriente I41<input id="nom-i41" type="number" min="0.001" step="0.01" value="0.6"><em>A</em></label>
+            <label class="tone-42">Corriente I42<input id="nom-i42" type="number" min="0.001" step="0.01" value="0.5"><em>A</em></label>
+          </div>
+        </article>
+      </div>
+      <div class="calibration-footer">
+        <div class="fixed-values" aria-live="polite">
+          <div><span>R11</span><strong id="fixed-r11">— Ω</strong></div><div><span>R12</span><strong id="fixed-r12">— Ω</strong></div>
+          <div><span>R21</span><strong id="fixed-r21">— Ω</strong></div><div><span>R22</span><strong id="fixed-r22">— Ω</strong></div>
+          <div><span>R31</span><strong id="fixed-r31">— Ω</strong></div><div><span>R32</span><strong id="fixed-r32">— Ω</strong></div>
+          <div><span>R41</span><strong id="fixed-r41">— Ω</strong></div><div><span>R42</span><strong id="fixed-r42">— Ω</strong></div>
+          <div class="nodes"><span>Tensiones de nodo</span><strong id="fixed-nodes">—</strong></div>
+        </div>
+        <button class="primary" id="calculate-fixed">Calcular resistencias</button>
+      </div>
+      <div id="message" class="message" role="status" aria-live="polite"></div>
+    </section>
+
+    <section class="regulation" id="regulation">
+      <div class="regulation-head">
+        <div class="section-title"><div class="step-label"><span class="step-number">2</span><span>REGULACIÓN</span></div><h2>Ajustar ocho corrientes</h2><p>Escriba los voltajes, las corrientes y los reóstatos.</p></div>
+        <div class="voltage-controls">
+          <div class="voltage-control"><label>Voltaje VA<input id="live-va" type="number" min="0" max="1000" step="0.01" value="24"><em>V</em></label><output id="live-va-out">24,00 V</output></div>
+          <div class="voltage-control"><label>Voltaje VB<input id="live-vb" type="number" min="0" max="1000" step="0.01" value="24"><em>V</em></label><output id="live-vb-out">24,00 V</output></div>
+        </div>
+      </div>
+      <div class="branches" id="branch-cards"></div>
+      <div class="action-bar">
+        <button class="primary" id="assist">Calcular ajuste de reóstatos</button>
+        <button class="secondary" id="reset-rheostats">Poner reóstatos en 0 Ω</button>
+        <details class="more-actions"><summary>Más opciones</summary><div>
+          <label>Reóstato máximo<input id="reo-max" type="number" min="0.01" step="1" value="100"><em>Ω</em></label>
+          <label>Tolerancia<input id="tolerance" type="number" min="0.01" max="100" step="0.1" value="2"><em>%</em></label>
+          <button class="secondary" id="save-case">Exportar caso</button><button class="secondary" id="load-case">Importar caso</button>
+          <button class="secondary" id="print-report">Imprimir informe</button><button class="secondary" id="install-app" hidden>Instalar aplicación</button>
+        </div></details><input id="case-file" type="file" accept="application/json,.json" hidden>
+      </div>
+    </section>
+
+    <section class="summary-panel" id="results">
+      <div class="summary-title"><span>RESULTADO OPERATIVO</span><h2>Estado del circuito</h2></div>
+      <div class="result-grid">
+        <div><span>I total</span><strong id="res-it">— A</strong></div><div><span>I lado A</span><strong id="res-ia">— A</strong></div>
+        <div><span>I lado B</span><strong id="res-ib">— A</strong></div><div><span>I por Rc2</span><strong id="res-i2">— A</strong></div>
+        <div><span>I por Rc4</span><strong id="res-i4">— A</strong></div><div><span>Caída Rc1</span><strong id="res-dv1">— V</strong></div>
+        <div><span>Caída Rc2</span><strong id="res-dv2">— V</strong></div><div><span>Caída Rc3</span><strong id="res-dv3">— V</strong></div>
+        <div><span>Caída Rc4</span><strong id="res-dv4">— V</strong></div>
+      </div>
+      <details class="technical-details"><summary>Detalles eléctricos</summary>
+        <div class="power-row"><div><span>Potencia de las fuentes</span><strong id="res-ps">— W</strong></div><div><span>Error de potencia</span><strong id="res-pe">— W</strong></div></div>
+        <div class="table-wrap"><table><thead><tr><th>Rama</th><th>Corriente</th><th>Objetivo</th><th>Desviación</th><th>R sistema</th><th>Reóstato</th><th>Potencia rama</th></tr></thead><tbody id="results-body"></tbody></table></div>
+        <div class="checks" id="checks"></div>
+      </details>
+    </section>
+  </main>
+  <script src="model.js"></script><script src="app.js"></script>
+</body>
+</html>

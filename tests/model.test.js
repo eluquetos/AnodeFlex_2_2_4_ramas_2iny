@@ -1,0 +1,25 @@
+const assert=require("node:assert/strict");
+const model=require("../docs/model.js");
+const currents={11:1.2,12:1,21:.9,22:.9,31:.8,32:.7,41:.6,42:.5};
+const cables={Rc1:.4,Rc2:.3,Rc3:.2,Rc4:.1};
+const nominal=model.dimension({VA:24,VB:24,...cables,currents});
+const expectedVoltages={1:22.4,2:21.86,3:23.48,4:23.37};
+const expectedTrunks={1:4,2:1.8,3:2.6,4:1.1};
+for(const node of model.NODES){assert.ok(Math.abs(nominal.voltages[node]-expectedVoltages[node])<1e-12,`voltaje V${node}`);assert.ok(Math.abs(nominal.trunks[node]-expectedTrunks[node])<1e-12,`corriente Rc${node}`)}
+const zero=Object.fromEntries(model.IDS.map(id=>[id,0]));
+const operating=model.simulate({VA:24,VB:24,...cables,fixed:nominal.fixed,rheostats:zero});
+for(const id of model.IDS)assert.ok(Math.abs(operating.currents[id]-currents[id])<1e-12,`corriente ${id}`);
+assert.ok(Math.abs(operating.sides.A.It-4)<1e-12);assert.ok(Math.abs(operating.sides.B.It-2.6)<1e-12);assert.ok(Math.abs(operating.It-6.6)<1e-12);assert.ok(Math.abs(operating.pError)<1e-10);
+const changedVA=model.simulate({VA:30,VB:24,...cables,fixed:nominal.fixed,rheostats:zero});
+for(const id of ["31","32","41","42"])assert.ok(Math.abs(changedVA.currents[id]-operating.currents[id])<1e-12,`VA no debe modificar I${id}`);
+const changedVB=model.simulate({VA:24,VB:30,...cables,fixed:nominal.fixed,rheostats:zero});
+for(const id of ["11","12","21","22"])assert.ok(Math.abs(changedVB.currents[id]-operating.currents[id])<1e-12,`VB no debe modificar I${id}`);
+const throttled=model.simulate({VA:24,VB:24,...cables,fixed:nominal.fixed,rheostats:{...zero,11:10}});
+assert.ok(throttled.currents[11]<operating.currents[11]);for(const id of ["31","32","41","42"])assert.ok(Math.abs(throttled.currents[id]-operating.currents[id])<1e-12);
+const edited=model.simulate({VA:24,VB:24,...cables,fixed:{...nominal.fixed,31:nominal.fixed[31]+5},rheostats:zero});
+assert.ok(edited.currents[31]<operating.currents[31]);for(const id of ["11","12","21","22"])assert.ok(Math.abs(edited.currents[id]-operating.currents[id])<1e-12);
+const targets={11:1,12:.8,21:.7,22:.7,31:.6,32:.5,41:.4,42:.3};
+const adjustment=model.adjust({VA:24,VB:24,...cables,fixed:nominal.fixed,targets,maxReo:100});assert.equal(adjustment.feasible,true);
+const adjusted=model.simulate({VA:24,VB:24,...cables,fixed:nominal.fixed,rheostats:adjustment.rheostats});for(const id of model.IDS)assert.ok(Math.abs(adjusted.currents[id]-targets[id])<1e-12,`objetivo ${id}`);
+assert.throws(()=>model.dimension({VA:1,VB:24,...cables,currents}),error=>error.message==="voltage-exhausted"&&error.side==="A");
+console.log("Pruebas del modelo ANODEFLEX 2 + 2: correctas");
