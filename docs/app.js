@@ -77,9 +77,9 @@ function assistedAdjustment(){
   ids.forEach(id=>setRheostat(id,result.rheostats[id]));solve();showMessage("Ajuste calculado. "+nodeText(result.voltages)+".","success");
 }
 
-function persist(){localStorage.setItem("anodeflex-2-2-4-fixed",JSON.stringify({fixed:state.fixed,stateNominal:state.nominal}))}
+function persist(){localStorage.setItem("anodeflex-2-2-4-2iny-fixed",JSON.stringify({fixed:state.fixed,stateNominal:state.nominal}))}
 function caseData(){return {format:"anodeflex-2-2-4-case",version:1,createdAt:new Date().toISOString(),calibration:{VA:state.nominal.VA,VB:state.nominal.VB,cables:state.nominal.cables,currents:state.nominal.currents,fixed:state.fixed},operation:{VA:n("live-va"),VB:n("live-vb"),targets:Object.fromEntries(ids.map(id=>[id,n("target-"+id)])),rheostats:Object.fromEntries(ids.map(id=>[id,n("reo-"+id)])),rheostatMax:n("reo-max"),tolerancePercent:n("tolerance")},results:state.op}}
-function saveCase(){if(!state.op)return;const blob=new Blob([JSON.stringify(caseData(),null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),link=document.createElement("a");link.href=url;link.download="anodeflex-2-2-4-ramas-"+new Date().toISOString().slice(0,10)+".json";link.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+function saveCase(){if(!state.op)return;const blob=new Blob([JSON.stringify(caseData(),null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),link=document.createElement("a");link.href=url;link.download="anodeflex-2-2-4-ramas-2iny-"+new Date().toISOString().slice(0,10)+".json";link.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
 function loadCase(file){
   const reader=new FileReader();reader.onload=()=>{try{
     const data=JSON.parse(reader.result);if(data.format!=="anodeflex-2-2-4-case"||!data.calibration?.fixed||!data.calibration?.cables||!data.operation)throw new Error();
@@ -96,7 +96,7 @@ function wireEvents(){
   ids.forEach(id=>{$("reo-"+id).addEventListener("input",solve);$("target-"+id).addEventListener("input",solve);$("system-r-"+id).addEventListener("input",solve)});
   $("reset-rheostats").addEventListener("click",()=>{ids.forEach(id=>setRheostat(id,0));solve()});$("assist").addEventListener("click",assistedAdjustment);$("tolerance").addEventListener("input",solve);$("save-case").addEventListener("click",saveCase);$("load-case").addEventListener("click",()=>$("case-file").click());$("case-file").addEventListener("change",event=>{if(event.target.files[0])loadCase(event.target.files[0]);event.target.value=""});$("print-report").addEventListener("click",()=>window.print());
 }
-function restore(){try{const saved=JSON.parse(localStorage.getItem("anodeflex-2-2-4-fixed"));if(saved?.fixed&&saved?.stateNominal){state.fixed=saved.fixed;state.nominal=saved.stateNominal;ids.forEach(id=>{$("fixed-r"+id).textContent=fmt(state.fixed[id],2)+" Ω";$("system-r-"+id).value=Number(state.fixed[id]).toFixed(2)});$("fixed-nodes").textContent=nodeText(state.nominal.voltages);$("live-va").value=state.nominal.VA;$("live-vb").value=state.nominal.VB;solve();return}}catch{}computeFixed()}
+function restore(){try{const saved=JSON.parse(localStorage.getItem("anodeflex-2-2-4-2iny-fixed")||localStorage.getItem("anodeflex-2-2-4-fixed"));if(saved?.fixed&&saved?.stateNominal){state.fixed=saved.fixed;state.nominal=saved.stateNominal;ids.forEach(id=>{$("fixed-r"+id).textContent=fmt(state.fixed[id],2)+" Ω";$("system-r-"+id).value=Number(state.fixed[id]).toFixed(2)});$("fixed-nodes").textContent=nodeText(state.nominal.voltages);$("live-va").value=state.nominal.VA;$("live-vb").value=state.nominal.VB;persist();solve();return}}catch{}computeFixed()}
 
 let installPrompt=null;window.addEventListener("beforeinstallprompt",event=>{event.preventDefault();installPrompt=event;$("install-app").hidden=false});$("install-app").addEventListener("click",async()=>{if(!installPrompt)return;installPrompt.prompt();await installPrompt.userChoice;installPrompt=null;$("install-app").hidden=true});
 buildBranches();wireEvents();restore();if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js"));

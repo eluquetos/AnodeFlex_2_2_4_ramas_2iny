@@ -1,4 +1,4 @@
-# ANODEFLEX 2 + 2 nodos · 8 ramas
+# ANODEFLEX 2 + 2 nodos · 2 inyecciones
 
 Aplicación web para calcular y regular un sistema ANODEFLEX alimentado desde el centro mediante dos voltajes independientes.
 

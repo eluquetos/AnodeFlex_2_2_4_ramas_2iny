@@ -1,6 +1,6 @@
 {
-  "name": "ANODEFLEX 2 + 2 Nodos",
-  "short_name": "ANODEFLEX 2+2",
+  "name": "ANODEFLEX 2 + 2 · 2 Inyecciones",
+  "short_name": "ANODEFLEX 2INY",
   "description": "Cálculo y regulación de ocho ramas ANODEFLEX con dos alimentaciones independientes.",
   "start_url": "./",
   "display": "standalone",
